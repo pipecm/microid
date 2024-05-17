@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  microid-database:
+    container_name: microid-database
+    image: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: midadmin
+      MYSQL_DATABASE: microid
+      MYSQL_USER: microidapp
+      MYSQL_PASSWORD: microid
+    ports:
+      - 3306:3306
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      timeout: 20s
+      retries: 10
