@@ -18,4 +18,13 @@ spring:
     jpa:
       repositories:
         enabled: true
+  security:
+    jwt:
+      secretKey: E8WCBRh7uYNLOwIR7fgsl2DV8Ggnplxm
+      expiration: 900000
+
+management:
+  endpoint:
+    health:
+      show-details: always
 

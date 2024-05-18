@@ -2,6 +2,7 @@ package com.simplyfelipe.microid.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -9,6 +10,7 @@ import java.util.List;
 
 @Entity
 @Data
+@NoArgsConstructor
 @Table(name = "mid_role")
 public class Role implements GrantedAuthority {
 

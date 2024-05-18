@@ -27,6 +27,7 @@ public enum RoleName {
 
     public static RoleName byName(String name) {
         return Optional.ofNullable(name)
+                .map(String::toUpperCase)
                 .map(BY_NAME::get)
                 .orElse(UNDEFINED);
     }
