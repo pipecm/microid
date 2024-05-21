@@ -52,11 +52,19 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    public ResponseEntity<ServiceResponse<?>> updateUser(UserDto userDto) {
-        return null;
+    @PutMapping
+    public ResponseEntity<ServiceResponse<?>> updateUser(@RequestBody UserDto userDto) {
+        return ResponseEntity.ok()
+                .body(ServiceResponse.builder()
+                        .code(HttpStatus.OK.value())
+                        .status(HttpStatus.OK.name())
+                        .body(userService.updateUser(userDto))
+                        .build()
+                );
     }
 
     @Override
+    @DeleteMapping
     public ResponseEntity<ServiceResponse<?>> deactivateUser(UserDto userDto) {
         return null;
     }
