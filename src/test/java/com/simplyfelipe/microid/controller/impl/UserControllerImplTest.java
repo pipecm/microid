@@ -26,22 +26,22 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = UserControllerImpl.class)
 @Import({ AuthenticationConfiguration.class, SecurityConfiguration.class, JwtUtil.class, JwtUtilParameters.class, JwtUtilConfig.class })
 class UserControllerImplTest {
 
+    private static final UUID USER_ID = UUID.fromString("508c9366-2cc2-4250-a88e-cbc1e2e74883");
     private static final String USERS_ENDPOINT = "/users";
+    private static final String USERS_ID_PATH = "/{id}";
     private static final String USER_EMAIL = "user@mail.com";
     private static final String USER_PASSWORD = "12345";
-    private static final String USER_ID = "508c9366-2cc2-4250-a88e-cbc1e2e74883";
     private static final String USER_ALREADY_EXISTS_MSG = "User user@mail.com already exists";
     private static final String USER_DOES_NOT_EXIST_MSG = "User user@mail.com does not exist";
+    private static final String USER_DEACTIVATED_OK = "User with ID %s deactivated successfully";
 
     @Autowired
     private MockMvc mockMvc;
@@ -60,7 +60,7 @@ class UserControllerImplTest {
     @Test
     void whenCreatingNonExistingUserThenUserIsCreatedOK() throws Exception {
         UserDto userBefore = UserDto.builder().email(USER_EMAIL).password(USER_PASSWORD).build();
-        UserDto userAfter = UserDto.builder().id(UUID.fromString(USER_ID)).email(USER_EMAIL).active(true).build();
+        UserDto userAfter = UserDto.builder().id(USER_ID).email(USER_EMAIL).active(true).build();
 
         when(userService.createUser(userBefore)).thenReturn(userAfter);
 
@@ -93,14 +93,14 @@ class UserControllerImplTest {
 
     @Test
     void whenUpdatingExistingUserThenUserIsUpdatedOK() throws Exception {
-        UserDto userBefore = UserDto.builder().id(UUID.fromString(USER_ID)).email(USER_EMAIL).password(USER_PASSWORD).active(true).build();
-        UserDto userAfter = UserDto.builder().id(UUID.fromString(USER_ID)).email(USER_EMAIL).password(null).active(true).build();
+        UserDto userBefore = UserDto.builder().id(USER_ID).email(USER_EMAIL).password(USER_PASSWORD).active(true).build();
+        UserDto userAfter = UserDto.builder().id(USER_ID).email(USER_EMAIL).password(null).active(true).build();
 
-        when(userService.updateUser(userBefore)).thenReturn(userAfter);
+        when(userService.updateUser(USER_ID, userBefore)).thenReturn(userAfter);
 
         ServiceResponse<UserDto> response = objectMapper.readValue(
                 this.mockMvc
-                        .perform(put(USERS_ENDPOINT)
+                        .perform(put(USERS_ENDPOINT + USERS_ID_PATH, USER_ID)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(userBefore)))
                         .andExpect(status().isOk())
@@ -109,7 +109,7 @@ class UserControllerImplTest {
                         .getContentAsString(),
                 new TypeReference<>() {});
 
-        verify(userService).updateUser(userBefore);
+        verify(userService).updateUser(USER_ID, userBefore);
 
         assertThat(response).isNotNull();
         assertThat(response.getCode()).isEqualTo(HttpStatus.OK.value());
@@ -119,12 +119,12 @@ class UserControllerImplTest {
 
     @Test
     void whenUpdatingNonExistingUserThenErrorReceived() throws Exception {
-        UserDto userBefore = UserDto.builder().id(UUID.fromString(USER_ID)).email(USER_EMAIL).password(USER_PASSWORD).active(true).build();
+        UserDto userBefore = UserDto.builder().id(USER_ID).email(USER_EMAIL).password(USER_PASSWORD).active(true).build();
 
-        when(userService.updateUser(userBefore)).thenThrow(new UsernameNotFoundException(USER_DOES_NOT_EXIST_MSG));
+        when(userService.updateUser(USER_ID, userBefore)).thenThrow(new UsernameNotFoundException(USER_DOES_NOT_EXIST_MSG));
 
         this.mockMvc
-                .perform(put(USERS_ENDPOINT)
+                .perform(put(USERS_ENDPOINT + USERS_ID_PATH, USER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userBefore)))
                 .andExpect(status().isNotFound())
@@ -132,6 +132,29 @@ class UserControllerImplTest {
                 .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.name()))
                 .andExpect(jsonPath("$.message").value(USER_DOES_NOT_EXIST_MSG));
 
-        verify(userService).updateUser(userBefore);
+        verify(userService).updateUser(USER_ID, userBefore);
+    }
+
+    @Test
+    void whenDeactivatingExistingUserThenUserIsDeactivatedOK() throws Exception {
+
+        doNothing().when(userService).deactivateUser(USER_ID);
+
+        ServiceResponse<String> response = objectMapper.readValue(
+                this.mockMvc
+                        .perform(delete(USERS_ENDPOINT + USERS_ID_PATH, USER_ID)
+                        .contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(status().isOk())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString(),
+                new TypeReference<>() {});
+
+        verify(userService).deactivateUser(USER_ID);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getCode()).isEqualTo(HttpStatus.OK.value());
+        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.name());
+        assertThat(response.getBody()).isEqualTo(String.format(USER_DEACTIVATED_OK, USER_ID));
     }
 }

@@ -2,6 +2,7 @@ package com.simplyfelipe.microid.util;
 
 import com.simplyfelipe.microid.entity.Role;
 import com.simplyfelipe.microid.entity.RoleName;
+import org.springframework.util.ObjectUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +17,7 @@ public final class RoleUtil {
     public static List<Role> buildRoleList(List<RoleName> roleNames) {
         List<Role> defaultRoles = new ArrayList<>();
 
-        if (roleNames.stream().noneMatch(RoleName.USER::equals)) {
+        if (ObjectUtils.isEmpty(roleNames) || roleNames.stream().noneMatch(RoleName.USER::equals)) {
             defaultRoles.add(new Role(RoleName.USER));
         }
 

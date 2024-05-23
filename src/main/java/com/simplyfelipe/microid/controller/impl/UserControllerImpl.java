@@ -11,10 +11,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/users")
 @AllArgsConstructor
 public class UserControllerImpl implements UserController {
+
+    private static final String USER_DEACTIVATED_OK = "User with ID %s deactivated successfully";
 
     private final UserService userService;
 
@@ -52,20 +56,27 @@ public class UserControllerImpl implements UserController {
     }
 
     @Override
-    @PutMapping
-    public ResponseEntity<ServiceResponse<?>> updateUser(@RequestBody UserDto userDto) {
+    @PutMapping("/{id}")
+    public ResponseEntity<ServiceResponse<?>> updateUser(@PathVariable UUID id, @RequestBody UserDto userDto) {
         return ResponseEntity.ok()
                 .body(ServiceResponse.builder()
                         .code(HttpStatus.OK.value())
                         .status(HttpStatus.OK.name())
-                        .body(userService.updateUser(userDto))
+                        .body(userService.updateUser(id, userDto))
                         .build()
                 );
     }
 
     @Override
-    @DeleteMapping
-    public ResponseEntity<ServiceResponse<?>> deactivateUser(UserDto userDto) {
-        return null;
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ServiceResponse<?>> deactivateUser(@PathVariable UUID id) {
+        userService.deactivateUser(id);
+        return ResponseEntity.ok()
+                .body(ServiceResponse.builder()
+                        .code(HttpStatus.OK.value())
+                        .status(HttpStatus.OK.name())
+                        .body(String.format(USER_DEACTIVATED_OK, id.toString()))
+                        .build()
+                );
     }
 }

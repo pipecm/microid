@@ -25,7 +25,7 @@ public class Role implements GrantedAuthority {
     private boolean active;
 
     @ToString.Exclude
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "roles")
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "roles")
     private List<User> users;
 
     public Role(RoleName roleName) {

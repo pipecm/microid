@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import static com.simplyfelipe.microid.util.RoleUtil.buildRoleList;
 
@@ -51,10 +52,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto updateUser(UserDto userDto) {
+    public UserDto updateUser(UUID id, UserDto userDto) {
         User found = userRepository
-                .findByEmailIgnoreCase(userDto.getEmail())
-                .orElseThrow(() -> userDoesNotExist(userDto.getEmail()));
+                .findById(id)
+                .orElseThrow(() -> userDoesNotExist(id.toString()));
 
         found.setPassword(userDto.getPassword());
         found.setActive(userDto.getActive());
@@ -65,15 +66,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto deactivateUser(String email) {
+    public void deactivateUser(UUID id) {
         User found = userRepository
-                .findByEmailIgnoreCase(email)
-                .orElseThrow(() -> userDoesNotExist(email));
+                .findById(id)
+                .orElseThrow(() -> userDoesNotExist(id.toString()));
 
         found.setActive(false);
         found.setLastUpdatedOn(LocalDateTime.now());
 
-        return userMapper.map(userRepository.save(found));
+        userRepository.save(found);
     }
 
     @Override
