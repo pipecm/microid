@@ -1,0 +1,9 @@
+mary@microid.com,null,null,1
+null,true,null,4
+null,false,null,1
+null,null,USER,5
+null,null,ADMIN,2
+null,null,null,5
+null,true,ADMIN,2
+admin@microid.com,true,ADMIN,1
+mary@microid.com,null,ADMIN,0

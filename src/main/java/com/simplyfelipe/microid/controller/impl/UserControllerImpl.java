@@ -75,7 +75,7 @@ public class UserControllerImpl implements UserController {
                 .body(ServiceResponse.builder()
                         .code(HttpStatus.OK.value())
                         .status(HttpStatus.OK.name())
-                        .body(String.format(USER_DEACTIVATED_OK, id.toString()))
+                        .message(String.format(USER_DEACTIVATED_OK, id.toString()))
                         .build()
                 );
     }

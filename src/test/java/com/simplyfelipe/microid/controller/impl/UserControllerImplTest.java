@@ -1,19 +1,21 @@
 package com.simplyfelipe.microid.controller.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.simplyfelipe.microid.BaseTest;
 import com.simplyfelipe.microid.config.AuthenticationConfiguration;
 import com.simplyfelipe.microid.config.SecurityConfiguration;
 import com.simplyfelipe.microid.dto.UserDto;
+import com.simplyfelipe.microid.entity.RoleName;
 import com.simplyfelipe.microid.exception.ServiceException;
+import com.simplyfelipe.microid.filter.FindUsersFilters;
 import com.simplyfelipe.microid.jwt.JwtUtil;
 import com.simplyfelipe.microid.jwt.JwtUtilConfig;
 import com.simplyfelipe.microid.jwt.JwtUtilParameters;
 import com.simplyfelipe.microid.response.ServiceResponse;
 import com.simplyfelipe.microid.service.UserService;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -23,20 +25,23 @@ import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = UserControllerImpl.class)
 @Import({ AuthenticationConfiguration.class, SecurityConfiguration.class, JwtUtil.class, JwtUtilParameters.class, JwtUtilConfig.class })
-class UserControllerImplTest {
+class UserControllerImplTest extends BaseTest {
+
+    private static final String USER_LIST_DTO_RESPONSE_PATH = "src/test/resources/responses/user_dto_list_response.json";
 
     private static final UUID USER_ID = UUID.fromString("508c9366-2cc2-4250-a88e-cbc1e2e74883");
     private static final String USERS_ENDPOINT = "/users";
     private static final String USERS_ID_PATH = "/{id}";
+    private static final String USERS_FILTER_PATH = "?active=%s&role=%s";
     private static final String USER_EMAIL = "user@mail.com";
     private static final String USER_PASSWORD = "12345";
     private static final String USER_ALREADY_EXISTS_MSG = "User user@mail.com already exists";
@@ -49,12 +54,50 @@ class UserControllerImplTest {
     @MockBean
     private UserService userService;
 
-    private static ObjectMapper objectMapper;
+    @Test
+    void whenSearchWithoutFiltersThenReturnAllUsers() throws Exception {
+        List<UserDto> usersFoundDto = readFile(USER_LIST_DTO_RESPONSE_PATH, new TypeReference<>() {});
+        when(userService.findUsers(any(FindUsersFilters.class))).thenReturn(usersFoundDto);
 
-    @BeforeAll
-    public static void init() {
-        objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
+        ServiceResponse<List<UserDto>> response = objectMapper.readValue(
+                this.mockMvc
+                        .perform(get(USERS_ENDPOINT)
+                        .contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(status().isOk())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString(),
+                new TypeReference<>() {});
+
+        verify(userService).findUsers(any(FindUsersFilters.class));
+
+        assertResponseWithBody(response, usersFoundDto, HttpStatus.OK);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"true,USER", "true,ADMIN", "false,USER", "false,ADMIN"})
+    void whenSearchWithFiltersThenReturnUsersThatFulfillTheFilters(boolean active, RoleName roleName) throws Exception {
+        List<UserDto> usersFoundDto = readFile(USER_LIST_DTO_RESPONSE_PATH, new TypeReference<>() {});
+        List<UserDto> usersDtoFiltered = usersFoundDto.stream()
+                .filter(u -> u.getActive() == active)
+                .filter(u -> u.getRoles().stream().anyMatch(r -> r.equals(roleName)))
+                .toList();
+
+        when(userService.findUsers(any(FindUsersFilters.class))).thenReturn(usersDtoFiltered);
+
+        ServiceResponse<List<UserDto>> response = objectMapper.readValue(
+                this.mockMvc
+                        .perform(get(USERS_ENDPOINT + String.format(USERS_FILTER_PATH, active, roleName.value))
+                        .contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(status().isOk())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString(),
+                new TypeReference<>() {});
+
+        verify(userService).findUsers(any(FindUsersFilters.class));
+
+        assertResponseWithBody(response, usersDtoFiltered, HttpStatus.OK);
     }
 
     @Test
@@ -64,13 +107,21 @@ class UserControllerImplTest {
 
         when(userService.createUser(userBefore)).thenReturn(userAfter);
 
-        this.mockMvc
-                .perform(post(USERS_ENDPOINT)
+        ServiceResponse<UserDto> response = objectMapper.readValue(
+                this.mockMvc
+                        .perform(post(USERS_ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userBefore)))
-                .andExpect(status().isCreated());
+                        .andExpect(status().isCreated())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString(),
+                new TypeReference<>() {}
+        );
 
         verify(userService).createUser(userBefore);
+
+        assertResponseWithBody(response, userAfter, HttpStatus.CREATED);
     }
 
     @Test
@@ -79,16 +130,21 @@ class UserControllerImplTest {
 
         when(userService.createUser(userBefore)).thenThrow(new ServiceException(HttpStatus.CONFLICT, USER_ALREADY_EXISTS_MSG));
 
-        this.mockMvc
-                .perform(post(USERS_ENDPOINT)
+        ServiceResponse<Void> response = objectMapper.readValue(
+                this.mockMvc
+                        .perform(post(USERS_ENDPOINT)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userBefore)))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value(HttpStatus.CONFLICT.value()))
-                .andExpect(jsonPath("$.status").value(HttpStatus.CONFLICT.name()))
-                .andExpect(jsonPath("$.message").value(USER_ALREADY_EXISTS_MSG));
+                        .andExpect(status().isConflict())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString(),
+                new TypeReference<>() {}
+        );
 
         verify(userService).createUser(userBefore);
+
+        assertResponseWithMessage(response, USER_ALREADY_EXISTS_MSG, HttpStatus.CONFLICT);
     }
 
     @Test
@@ -111,10 +167,7 @@ class UserControllerImplTest {
 
         verify(userService).updateUser(USER_ID, userBefore);
 
-        assertThat(response).isNotNull();
-        assertThat(response.getCode()).isEqualTo(HttpStatus.OK.value());
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.name());
-        assertThat(response.getBody()).isEqualTo(userAfter);
+        assertResponseWithBody(response, userAfter, HttpStatus.OK);
     }
 
     @Test
@@ -123,16 +176,21 @@ class UserControllerImplTest {
 
         when(userService.updateUser(USER_ID, userBefore)).thenThrow(new UsernameNotFoundException(USER_DOES_NOT_EXIST_MSG));
 
-        this.mockMvc
-                .perform(put(USERS_ENDPOINT + USERS_ID_PATH, USER_ID)
+        ServiceResponse<Void> response = objectMapper.readValue(
+                this.mockMvc
+                        .perform(put(USERS_ENDPOINT + USERS_ID_PATH, USER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userBefore)))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value(HttpStatus.NOT_FOUND.value()))
-                .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.name()))
-                .andExpect(jsonPath("$.message").value(USER_DOES_NOT_EXIST_MSG));
+                        .andExpect(status().isNotFound())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString(),
+                new TypeReference<>() {}
+        );
 
         verify(userService).updateUser(USER_ID, userBefore);
+
+        assertResponseWithMessage(response, USER_DOES_NOT_EXIST_MSG, HttpStatus.NOT_FOUND);
     }
 
     @Test
@@ -152,9 +210,6 @@ class UserControllerImplTest {
 
         verify(userService).deactivateUser(USER_ID);
 
-        assertThat(response).isNotNull();
-        assertThat(response.getCode()).isEqualTo(HttpStatus.OK.value());
-        assertThat(response.getStatus()).isEqualTo(HttpStatus.OK.name());
-        assertThat(response.getBody()).isEqualTo(String.format(USER_DEACTIVATED_OK, USER_ID));
+        assertResponseWithMessage(response, String.format(USER_DEACTIVATED_OK, USER_ID), HttpStatus.OK);
     }
 }

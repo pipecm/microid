@@ -1,14 +1,11 @@
 package com.simplyfelipe.microid;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.simplyfelipe.microid.dto.UserDto;
 import com.simplyfelipe.microid.entity.User;
 import com.simplyfelipe.microid.mapper.UserMapper;
 import com.simplyfelipe.microid.repository.UserRepository;
 import com.simplyfelipe.microid.response.ServiceResponse;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,14 +46,6 @@ class UserApplicationTest extends ApplicationTest {
 
     @Autowired
     private MockMvc mockMvc;
-
-    private static ObjectMapper objectMapper;
-
-    @BeforeAll
-    public static void init() {
-        objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-    }
 
     @Test
     void whenCreatingNonExistingUserThenUserIsCreatedOK() throws Exception {

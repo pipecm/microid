@@ -6,7 +6,7 @@ import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.utility.DockerImageName;
 
-abstract class ApplicationTest {
+public abstract class ApplicationTest extends BaseTest {
 
     @Container
     protected static MySQLContainer<?> mySQLContainer = new MySQLContainer<>(DockerImageName.parse("mysql"));

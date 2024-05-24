@@ -1,6 +1,7 @@
 package com.simplyfelipe.microid.entity;
 
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,6 +13,7 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
+@EqualsAndHashCode(callSuper = true)
 @Table(name = "mid_user")
 public class User extends org.springframework.security.core.userdetails.User {
     private static final String DEFAULT_USERNAME = "default_user";
