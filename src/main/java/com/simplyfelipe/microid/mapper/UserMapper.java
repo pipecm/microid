@@ -39,8 +39,8 @@ public class UserMapper {
                 .id(user.getId())
                 .email(user.getEmail())
                 .active(user.getActive())
-                .createdOn(user.getCreatedOn())
-                .lastUpdatedOn(user.getLastUpdatedOn())
+                .createdOn(user.getCreatedOn().truncatedTo(ChronoUnit.MICROS))
+                .lastUpdatedOn(user.getLastUpdatedOn().truncatedTo(ChronoUnit.MICROS))
                 .roles(user.getRoles().stream().map(Role::getRoleName).toList())
                 .lastLogin(processLoginHistory(user))
                 .build();
@@ -53,6 +53,7 @@ public class UserMapper {
                 .flatMap(Collection::stream)
                 .map(Login::getLoginAt)
                 .max(LocalDateTime::compareTo)
+                .map(time -> time.truncatedTo(ChronoUnit.MICROS))
                 .orElse(null);
     }
 }

@@ -26,6 +26,7 @@ public class LoginControllerImpl implements LoginController {
     public ResponseEntity<ServiceResponse<?>> login(@RequestBody LoginRequest loginRequest) {
         return ResponseEntity.ok(ServiceResponse.builder()
                 .code(HttpStatus.OK.value())
+                .status(HttpStatus.OK.name())
                 .message(LOGIN_SUCCESSFUL_MSG)
                 .body(loginService.login(loginRequest))
                 .build());

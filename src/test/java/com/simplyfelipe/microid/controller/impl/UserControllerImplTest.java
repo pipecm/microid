@@ -3,14 +3,10 @@ package com.simplyfelipe.microid.controller.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.simplyfelipe.microid.BaseTest;
 import com.simplyfelipe.microid.config.AuthenticationConfiguration;
-import com.simplyfelipe.microid.config.SecurityConfiguration;
 import com.simplyfelipe.microid.dto.UserDto;
 import com.simplyfelipe.microid.entity.RoleName;
 import com.simplyfelipe.microid.exception.ServiceException;
 import com.simplyfelipe.microid.filter.FindUsersFilters;
-import com.simplyfelipe.microid.jwt.JwtUtil;
-import com.simplyfelipe.microid.jwt.JwtUtilConfig;
-import com.simplyfelipe.microid.jwt.JwtUtilParameters;
 import com.simplyfelipe.microid.response.ServiceResponse;
 import com.simplyfelipe.microid.service.UserService;
 import org.junit.jupiter.api.Test;
@@ -23,6 +19,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
@@ -33,11 +30,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = UserControllerImpl.class)
-@Import({ AuthenticationConfiguration.class, SecurityConfiguration.class, JwtUtil.class, JwtUtilParameters.class, JwtUtilConfig.class })
+@ContextConfiguration(classes = ControllerTestConfiguration.class)
+@Import(AuthenticationConfiguration.class)
 class UserControllerImplTest extends BaseTest {
-
     private static final String USER_LIST_DTO_RESPONSE_PATH = "src/test/resources/responses/user_dto_list_response.json";
-
     private static final UUID USER_ID = UUID.fromString("508c9366-2cc2-4250-a88e-cbc1e2e74883");
     private static final String USERS_ENDPOINT = "/users";
     private static final String USERS_ID_PATH = "/{id}";
@@ -157,8 +153,8 @@ class UserControllerImplTest extends BaseTest {
         ServiceResponse<UserDto> response = objectMapper.readValue(
                 this.mockMvc
                         .perform(put(USERS_ENDPOINT + USERS_ID_PATH, USER_ID)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(userBefore)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userBefore)))
                         .andExpect(status().isOk())
                         .andReturn()
                         .getResponse()

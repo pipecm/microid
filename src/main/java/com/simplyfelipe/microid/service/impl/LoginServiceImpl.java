@@ -20,6 +20,7 @@ import org.springframework.util.ObjectUtils;
 
 import java.time.ZoneId;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @AllArgsConstructor
@@ -53,8 +54,9 @@ public class LoginServiceImpl implements LoginService {
                     .build();
 
         } catch (IllegalArgumentException | BadCredentialsException e) {
-            if (Optional.ofNullable(login).map(Login::getId).map(id -> !ObjectUtils.isEmpty(id)).orElse(false)) {
-                loginRepository.setLoginFailed(login.getId());
+            UUID loginId = Optional.ofNullable(login).map(Login::getId).orElse(null);
+            if (!ObjectUtils.isEmpty(loginId)) {
+                loginRepository.setLoginFailed(loginId);
             }
             throw new ServiceException(HttpStatus.BAD_REQUEST, INVALID_LOGIN_MSG);
         }

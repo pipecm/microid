@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -18,7 +19,7 @@ public class RoleServiceImpl implements RoleService {
     public List<Role> processRoles(List<Role> roles) {
         return roles.stream()
                 .map(role -> roleRepository.findByNameIgnoreCase(role.getName()).orElseGet(() -> saveRole(role)))
-                .toList();
+                .collect(Collectors.toList());
     }
 
     private Role saveRole(Role role) {

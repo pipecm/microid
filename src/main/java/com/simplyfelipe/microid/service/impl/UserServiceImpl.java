@@ -9,17 +9,21 @@ import com.simplyfelipe.microid.repository.UserRepository;
 import com.simplyfelipe.microid.service.RoleService;
 import com.simplyfelipe.microid.service.UserService;
 import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
 import static com.simplyfelipe.microid.util.RoleUtil.buildRoleList;
 
+@Log4j2
 @Service
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -57,10 +61,10 @@ public class UserServiceImpl implements UserService {
                 .findById(id)
                 .orElseThrow(() -> userDoesNotExist(id.toString()));
 
-        found.setPassword(userDto.getPassword());
+        found.setPassword(ObjectUtils.isEmpty(userDto.getPassword()) ? found.getPassword() : userDto.getPassword());
         found.setActive(userDto.getActive());
         found.setRoles(roleService.processRoles(buildRoleList(userDto.getRoles())));
-        found.setLastUpdatedOn(LocalDateTime.now());
+        found.setLastUpdatedOn(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
 
         return userMapper.map(userRepository.save(found));
     }
