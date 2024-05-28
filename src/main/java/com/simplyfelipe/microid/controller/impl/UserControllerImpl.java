@@ -24,9 +24,9 @@ public class UserControllerImpl implements UserController {
 
     @Override
     @GetMapping
-    public ResponseEntity<ServiceResponse<?>> findUsers(@RequestParam(required = false) String email,
-                                                        @RequestParam(required = false) Boolean active,
-                                                        @RequestParam(required = false) String role) {
+    public ResponseEntity<ServiceResponse<Object>> findUsers(@RequestParam(required = false) String email,
+                                                             @RequestParam(required = false) Boolean active,
+                                                             @RequestParam(required = false) String role) {
 
         return ResponseEntity.ok(
                 ServiceResponse.builder()
@@ -45,7 +45,7 @@ public class UserControllerImpl implements UserController {
 
     @Override
     @PostMapping
-    public ResponseEntity<ServiceResponse<?>> createUser(@RequestBody UserDto userDto) {
+    public ResponseEntity<ServiceResponse<Object>> createUser(@RequestBody UserDto userDto) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ServiceResponse.builder()
                         .code(HttpStatus.CREATED.value())
@@ -57,7 +57,7 @@ public class UserControllerImpl implements UserController {
 
     @Override
     @PutMapping("/{id}")
-    public ResponseEntity<ServiceResponse<?>> updateUser(@PathVariable UUID id, @RequestBody UserDto userDto) {
+    public ResponseEntity<ServiceResponse<Object>> updateUser(@PathVariable UUID id, @RequestBody UserDto userDto) {
         return ResponseEntity.ok()
                 .body(ServiceResponse.builder()
                         .code(HttpStatus.OK.value())
@@ -69,7 +69,7 @@ public class UserControllerImpl implements UserController {
 
     @Override
     @DeleteMapping("/{id}")
-    public ResponseEntity<ServiceResponse<?>> deactivateUser(@PathVariable UUID id) {
+    public ResponseEntity<ServiceResponse<Object>> deactivateUser(@PathVariable UUID id) {
         userService.deactivateUser(id);
         return ResponseEntity.ok()
                 .body(ServiceResponse.builder()

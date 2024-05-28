@@ -39,10 +39,11 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 
 	implementation platform('org.testcontainers:testcontainers-bom:1.19.8')
-	testImplementation('org.testcontainers:testcontainers')
-	testImplementation('org.testcontainers:mysql')
-	testImplementation('org.testcontainers:junit-jupiter')
+	testImplementation 'org.testcontainers:testcontainers'
+	testImplementation 'org.testcontainers:mysql'
+	testImplementation 'org.testcontainers:junit-jupiter'
 
+	testRuntimeOnly 'com.h2database:h2'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
 	testCompileOnly 'org.projectlombok:lombok'
@@ -54,6 +55,7 @@ tasks.named('test') {
 }
 
 test {
+	systemProperty 'spring.profiles.active', System.getProperty('profile') == null ? 'integration' : System.getProperty('profile')
 	finalizedBy jacocoTestReport
 }
 
@@ -85,7 +87,7 @@ jacocoTestCoverageVerification {
 	violationRules {
 		rule {
 			limit {
-				minimum = 0.1
+				minimum = 0.8
 			}
 		}
 	}

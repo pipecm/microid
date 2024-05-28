@@ -2,10 +2,10 @@ spring:
   application:
     name: microid
   datasource:
-    url: jdbc:mysql://localhost:3306/microid
     driverClassName: com.mysql.cj.jdbc.Driver
-    username: microidapp
-    password: microid
+    url: ${DB_URL:jdbc:mysql://localhost:3306/microid}
+    username: ${DB_USER:microidapp}
+    password: ${DB_PASSWORD:microid}
   jpa:
     show-sql: true
     defer-datasource-initialization: true

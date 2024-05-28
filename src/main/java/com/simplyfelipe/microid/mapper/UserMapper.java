@@ -5,9 +5,12 @@ import com.simplyfelipe.microid.entity.Login;
 import com.simplyfelipe.microid.entity.Role;
 import com.simplyfelipe.microid.entity.RoleName;
 import com.simplyfelipe.microid.entity.User;
+import com.simplyfelipe.microid.exception.ServiceException;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -25,8 +28,11 @@ public class UserMapper {
     private final PasswordEncoder passwordEncoder;
 
     public User map(UserDto userDto) {
+        if (ObjectUtils.isEmpty(userDto)) {
+            throw new ServiceException(HttpStatus.BAD_REQUEST, "User cannot be empty");
+        }
         LocalDateTime now = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS);
-        List<RoleName> roles = Optional.ofNullable(userDto).map(UserDto::getRoles).orElse(Collections.emptyList());
+        List<RoleName> roles = Optional.of(userDto).map(UserDto::getRoles).orElse(Collections.emptyList());
         User user = new User(userDto.getEmail(), passwordEncoder.encode(userDto.getPassword()), buildRoleList(roles));
         user.setActive(Optional.of(userDto).map(UserDto::getActive).orElse(true));
         user.setCreatedOn(Optional.of(userDto).map(UserDto::getCreatedOn).map(time -> time.truncatedTo(ChronoUnit.MICROS)).orElse(now));

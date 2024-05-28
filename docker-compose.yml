@@ -1,9 +1,28 @@
 version: '3.8'
 
 services:
-  microid-database:
-    container_name: microid-database
-    image: mysql
+  microid-app:
+    container_name: microid-app
+    build:
+      dockerfile: docker/Dockerfile
+    ports:
+      - 8080:8080
+    depends_on:
+      microid-db:
+        condition: service_healthy
+    restart: on-failure
+    links:
+      - microid-db
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      DB_URL: jdbc:mysql://microid-db:3306/microid
+      DB_USER: microidapp
+      DB_PASSWORD: microid
+
+  microid-db:
+    container_name: microid-db
+    image: mysql:latest
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: midadmin

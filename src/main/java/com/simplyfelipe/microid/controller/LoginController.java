@@ -5,5 +5,5 @@ import com.simplyfelipe.microid.response.ServiceResponse;
 import org.springframework.http.ResponseEntity;
 
 public interface LoginController {
-    ResponseEntity<ServiceResponse<?>> login(LoginRequest loginRequest);
+    ResponseEntity<ServiceResponse<Object>> login(LoginRequest loginRequest);
 }

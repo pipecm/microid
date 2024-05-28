@@ -23,7 +23,7 @@ public class LoginControllerImpl implements LoginController {
 
     @Override
     @PostMapping
-    public ResponseEntity<ServiceResponse<?>> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<ServiceResponse<Object>> login(@RequestBody LoginRequest loginRequest) {
         return ResponseEntity.ok(ServiceResponse.builder()
                 .code(HttpStatus.OK.value())
                 .status(HttpStatus.OK.name())
