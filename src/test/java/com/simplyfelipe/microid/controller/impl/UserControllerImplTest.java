@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -51,6 +52,7 @@ class UserControllerImplTest extends BaseTest {
     private UserService userService;
 
     @Test
+    @WithUserDetails(USER_EMAIL)
     void whenSearchWithoutFiltersThenReturnAllUsers() throws Exception {
         List<UserDto> usersFoundDto = readFile(USER_LIST_DTO_RESPONSE_PATH, new TypeReference<>() {});
         when(userService.findUsers(any(FindUsersFilters.class))).thenReturn(usersFoundDto);
@@ -71,6 +73,7 @@ class UserControllerImplTest extends BaseTest {
     }
 
     @ParameterizedTest
+    @WithUserDetails(USER_EMAIL)
     @CsvSource({"true,USER", "true,ADMIN", "false,USER", "false,ADMIN"})
     void whenSearchWithFiltersThenReturnUsersThatFulfillTheFilters(boolean active, RoleName roleName) throws Exception {
         List<UserDto> usersFoundDto = readFile(USER_LIST_DTO_RESPONSE_PATH, new TypeReference<>() {});
@@ -144,6 +147,7 @@ class UserControllerImplTest extends BaseTest {
     }
 
     @Test
+    @WithUserDetails(USER_EMAIL)
     void whenUpdatingExistingUserThenUserIsUpdatedOK() throws Exception {
         UserDto userBefore = UserDto.builder().id(USER_ID).email(USER_EMAIL).password(USER_PASSWORD).active(true).build();
         UserDto userAfter = UserDto.builder().id(USER_ID).email(USER_EMAIL).password(null).active(true).build();
@@ -167,6 +171,7 @@ class UserControllerImplTest extends BaseTest {
     }
 
     @Test
+    @WithUserDetails(USER_EMAIL)
     void whenUpdatingNonExistingUserThenErrorReceived() throws Exception {
         UserDto userBefore = UserDto.builder().id(USER_ID).email(USER_EMAIL).password(USER_PASSWORD).active(true).build();
 
@@ -190,6 +195,7 @@ class UserControllerImplTest extends BaseTest {
     }
 
     @Test
+    @WithUserDetails(USER_EMAIL)
     void whenDeactivatingExistingUserThenUserIsDeactivatedOK() throws Exception {
 
         doNothing().when(userService).deactivateUser(USER_ID);

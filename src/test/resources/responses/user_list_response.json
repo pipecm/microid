@@ -19,6 +19,7 @@
   {
     "id": "0fc1f743-e69c-4b95-b246-1d42cb8810c9",
     "email": "jack@microid.com",
+    "password": "$2a$10$VtLnU/ZYARTQOThiocEuue3w6xLMi0Z/PO3KvSBwwDEWuaHN2tfq2",
     "active": true,
     "createdOn": "2024-05-17T15:19:40.63045",
     "lastUpdatedOn": "2024-05-17T15:19:40.63045",

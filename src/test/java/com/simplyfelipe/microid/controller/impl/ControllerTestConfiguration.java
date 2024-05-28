@@ -1,8 +1,12 @@
 package com.simplyfelipe.microid.controller.impl;
 
 import com.simplyfelipe.microid.entity.User;
+import com.simplyfelipe.microid.jwt.JwtUtil;
+import com.simplyfelipe.microid.jwt.JwtUtilConfig;
+import com.simplyfelipe.microid.jwt.JwtUtilParameters;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -13,6 +17,7 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import java.util.List;
 
 @TestConfiguration
+@Import({JwtUtil.class, JwtUtilConfig.class, JwtUtilParameters.class})
 public class ControllerTestConfiguration {
     private static final String USER_EMAIL = "user@mail.com";
     private static final String USER_PASSWORD = "12345";
