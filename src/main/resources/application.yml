@@ -21,9 +21,12 @@ spring:
     init:
       data-locations: classpath:/database/data.sql
   security:
+    whitelist:
+      all-methods: /login, /api/docs/**, /v3/api-docs/**, /swagger-ui/**, /actuator/health/**
+      post: /users
     jwt:
       secretKey: E8WCBRh7uYNLOwIR7fgsl2DV8Ggnplxm
-      expiration: 900000
+      expiration: 15
 
 management:
   endpoint:

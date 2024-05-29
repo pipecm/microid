@@ -15,7 +15,7 @@ import org.springframework.util.ObjectUtils;
 
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -72,24 +72,18 @@ public class JwtUtil {
         }
     }
 
-    public String resolveToken(HttpServletRequest request) {
-        String bearerToken = request.getHeader(TOKEN_HEADER);
-        if (bearerToken != null && bearerToken.startsWith(TOKEN_PREFIX)) {
-            return bearerToken.substring(TOKEN_PREFIX.length());
-        }
-        return null;
+    public String resolveToken(HttpServletRequest httpServletRequest) {
+        return Optional.ofNullable(httpServletRequest)
+                .map(request -> request.getHeader(TOKEN_HEADER))
+                .filter(token -> token.startsWith(TOKEN_PREFIX))
+                .map(token -> token.substring(TOKEN_PREFIX.length()))
+                .orElse(null);
     }
 
     public boolean validateClaims(Claims claims) {
-        return claims.getExpiration().after(new Date());
-    }
-
-    public String getEmail(Claims claims) {
-        return claims.getSubject();
-    }
-
-    @SuppressWarnings(value = "unchecked")
-    private List<String> getRoles(Claims claims) {
-        return (List<String>) claims.get(KEY_ROLES);
+        return Optional.ofNullable(claims)
+                .map(Claims::getExpiration)
+                .map(expiration -> expiration.after(new Date()))
+                .orElse(false);
     }
 }

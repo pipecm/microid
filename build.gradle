@@ -3,6 +3,7 @@ plugins {
 	id 'org.springframework.boot' version '3.2.5'
 	id 'io.spring.dependency-management' version '1.1.4'
 	id 'jacoco'
+	id 'name.remal.sonarlint' version "4.2.1"
 }
 
 group = 'com.simplyfelipe'
@@ -29,6 +30,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'io.jsonwebtoken:jjwt:0.12.5'
 	implementation 'io.jsonwebtoken:jjwt-impl:0.12.5'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
@@ -94,3 +96,4 @@ jacocoTestCoverageVerification {
 }
 
 check.dependsOn jacocoTestCoverageVerification
+sonarLint.nodeJs.logNodeJsNotFound = false

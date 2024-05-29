@@ -13,8 +13,9 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
-@EqualsAndHashCode(callSuper = true)
 @Table(name = "mid_user")
+@SuppressWarnings({"squid:S1948", "squid:S2176"})
+@EqualsAndHashCode(callSuper = true)
 public class User extends org.springframework.security.core.userdetails.User {
     private static final String DEFAULT_USERNAME = "default_user";
     private static final String DEFAULT_PASSWORD = "default_password";

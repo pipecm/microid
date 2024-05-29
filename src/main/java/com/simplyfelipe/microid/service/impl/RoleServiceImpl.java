@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
+@SuppressWarnings("squid:S6204")
 public class RoleServiceImpl implements RoleService {
 
     private final RoleRepository roleRepository;

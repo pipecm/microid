@@ -67,6 +67,8 @@ class MicroidApplicationTests extends BaseTest {
 	private static final String LOGIN_PASSWORD = "12345";
 	private static final String KEY_AUTHORIZATION = "Authorization";
 	private static final String BEARER_TOKEN = "Bearer %s";
+	private static final String EXPIRED_TOKEN = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBtaWNyb2lkLmNvbSIsImVtYWlsIjoiYWRtaW5AbWljcm9pZC5jb20iLCJyb2xlcyI6WyJVU0VSIiwiQURNSU4iXSwiZXhwIjoxNzE3MDE2MTYzfQ.cbwl1GwHRxnRy1olSD5-kBXvpIyO0NQ7WVA7ku-_gNE";
+	private static final String SESSION_EXPIRED_MSG = "The current session has expired, please login again";
 
 	private String bearerToken;
 
@@ -122,6 +124,22 @@ class MicroidApplicationTests extends BaseTest {
 				.toList();
 
 		assertResponseWithBodySize(response, usersFound, HttpStatus.OK, expectedSize);
+	}
+
+	@Test
+	void whenSearchingWithExpiredTokenThenErrorResponseIsReturned() throws Exception {
+		ServiceResponse<Void> response = objectMapper.readValue(
+				this.mockMvc
+						.perform(get(USERS_ENDPOINT)
+						.header(KEY_AUTHORIZATION, EXPIRED_TOKEN)
+						.contentType(MediaType.APPLICATION_JSON))
+						.andExpect(status().isUnauthorized())
+						.andReturn()
+						.getResponse()
+						.getContentAsString(),
+				new TypeReference<>() {});
+
+		assertResponseWithMessage(response, SESSION_EXPIRED_MSG, HttpStatus.UNAUTHORIZED);
 	}
 
 	@Test

@@ -112,6 +112,8 @@ For performing operations with authentication required, you have to use the retu
 ```
 Authorization: Bearer {token}
 ```
+The token validity (in minutes) can be set by modifying the value of the property `spring.security.jwt.expiration` in the file `src/main/resources/application.yml`.
+
 ## Users
 ### User creation
 For creating users, you have to execute the following cURL:
@@ -194,7 +196,9 @@ curl --location --request PUT 'http://localhost:8080/users/{user_id}' \
 | password  | Password of the user             | false     | Current password |
 | roles     | List of roles                    | false     | Current roles    |
 | active    | Flag for enabling/disabling user | false     | true             |
+
 Use the same SQL query described in the section "User creation" for retrieving the ID of the user that you want to update and for checking if the user was updated correctly.
+
 ### User deactivation
 For deactivating users, you have to execute the following cURL as authenticated user:
 ```
