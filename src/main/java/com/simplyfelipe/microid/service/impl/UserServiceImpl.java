@@ -62,8 +62,8 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> userDoesNotExist(id.toString()));
 
         found.setPassword(ObjectUtils.isEmpty(userDto.getPassword()) ? found.getPassword() : userDto.getPassword());
-        found.setActive(userDto.getActive());
-        found.setRoles(roleService.processRoles(buildRoleList(userDto.getRoles())));
+        found.setActive(ObjectUtils.isEmpty(userDto.getActive()) ? found.getActive()  : userDto.getActive());
+        found.setRoles(ObjectUtils.isEmpty(userDto.getRoles()) ? found.getRoles() : roleService.processRoles(buildRoleList(userDto.getRoles())));
         found.setLastUpdatedOn(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
 
         return userMapper.map(userRepository.save(found));
@@ -76,7 +76,7 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> userDoesNotExist(id.toString()));
 
         found.setActive(false);
-        found.setLastUpdatedOn(LocalDateTime.now());
+        found.setLastUpdatedOn(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
 
         userRepository.save(found);
     }

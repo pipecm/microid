@@ -31,6 +31,8 @@ services:
       MYSQL_PASSWORD: microid
     ports:
       - 3306:3306
+    volumes:
+      - ./src/main/resources/database:/docker-entrypoint-initdb.d
     healthcheck:
       test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
       timeout: 20s
