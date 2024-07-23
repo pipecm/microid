@@ -217,5 +217,5 @@ Note: The user information is not physically deleted from the database.
 ## Swagger (Coming soon)
 Upon enabling, you can find the Swagger documentation in the following location
 ```
-http://localhost:8080/api/docs/swagger-ui/index.html
+http://localhost:8080/swagger-ui/index.html
 ```
