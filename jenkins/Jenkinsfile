@@ -1,0 +1,42 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Cloning') {
+            steps {
+                git branch: "main", url: 'https://github.com/pipecm/microid.git'
+            }
+        }
+
+        stage('Analysis') {
+            steps {
+                withSonarQubeEnv('sq-docker'){
+                    sh "echo 'Starting SonarQube analysis'"
+                    sh "./gradlew sonar -Dsonar.projectKey=microid -Dsonar.projectName='microid' -Dsonar.host.url=http://sonarqube-server:9000 -Dsonar.token=sqp_76e3aadbcefae084fd0e828d1397a981af77209d"
+                    sh "echo 'Analysis finished successfully'"
+                }
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh "echo 'Starting build'"
+                sh "./gradlew clean build"
+            }
+
+            post {
+                success {
+                    sh "echo 'Build success'"
+                    junit '**/target/surefire-reports/TEST-*.xml'
+                    archiveArtifacts 'target/*.jar'
+                }
+            }
+        }
+
+        stage('Finish') {
+            steps {
+                sh "echo 'Deployment finished successfully'"
+            }
+        }
+    }
+}
